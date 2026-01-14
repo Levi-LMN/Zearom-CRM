@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{% if lead %}Edit Lead{% else %}Create Lead{% endif %} - Zearom CRM{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-deep-space">{% if lead %}Edit Lead{% else %}Create New Lead{% endif %}</h1>
+        <p class="text-gray-600 mt-1">{% if lead %}Update lead information{% else %}Add a new sales opportunity{% endif %}</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <!-- Organization & Product -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="organization_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-building text-sky-blue mr-2"></i>Organization *
+                </label>
+                <select name="organization_id" id="organization_id" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="">Select organization...</option>
+                    {% for org in organizations %}
+                    <option value="{{ org.id }}" {% if lead and lead.organization_id == org.id %}selected{% endif %}>
+                        {{ org.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="product_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-box text-steel-blue mr-2"></i>Product *
+                </label>
+                <select name="product_id" id="product_id" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="">Select product...</option>
+                    {% for product in products %}
+                    <option value="{{ product.id }}" {% if lead and lead.product_id == product.id %}selected{% endif %}>
+                        {{ product.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Stage & Temperature -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="stage" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-layer-group text-green-500 mr-2"></i>Stage
+                </label>
+                <select name="stage" id="stage"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="New" {% if not lead or lead.stage == 'New' %}selected{% endif %}>New</option>
+                    <option value="Reached" {% if lead and lead.stage == 'Reached' %}selected{% endif %}>Reached</option>
+                    <option value="Interested" {% if lead and lead.stage == 'Interested' %}selected{% endif %}>Interested</option>
+                    <option value="Demo Scheduled" {% if lead and lead.stage == 'Demo Scheduled' %}selected{% endif %}>Demo Scheduled</option>
+                    <option value="Pilot" {% if lead and lead.stage == 'Pilot' %}selected{% endif %}>Pilot</option>
+                    <option value="Pricing" {% if lead and lead.stage == 'Pricing' %}selected{% endif %}>Pricing</option>
+                    <option value="Closed Won" {% if lead and lead.stage == 'Closed Won' %}selected{% endif %}>Closed Won</option>
+                    <option value="Closed Lost" {% if lead and lead.stage == 'Closed Lost' %}selected{% endif %}>Closed Lost</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="temperature" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-thermometer-half text-orange-500 mr-2"></i>Temperature
+                </label>
+                <select name="temperature" id="temperature"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="Warm" {% if not lead or lead.temperature == 'Warm' %}selected{% endif %}>Warm</option>
+                    <option value="Hot" {% if lead and lead.temperature == 'Hot' %}selected{% endif %}>Hot</option>
+                    <option value="Cold" {% if lead and lead.temperature == 'Cold' %}selected{% endif %}>Cold</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Source & Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="source" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-arrow-right text-purple-500 mr-2"></i>Source
+                </label>
+                <select name="source" id="source"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="">Select source...</option>
+                    <option value="Referral" {% if lead and lead.source == 'Referral' %}selected{% endif %}>Referral</option>
+                    <option value="Outbound" {% if lead and lead.source == 'Outbound' %}selected{% endif %}>Outbound</option>
+                    <option value="Inbound" {% if lead and lead.source == 'Inbound' %}selected{% endif %}>Inbound</option>
+                    <option value="Partner" {% if lead and lead.source == 'Partner' %}selected{% endif %}>Partner</option>
+                    <option value="Event" {% if lead and lead.source == 'Event' %}selected{% endif %}>Event</option>
+                    <option value="Other" {% if lead and lead.source == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+
+            {% if lead %}
+            <div>
+                <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>Status
+                </label>
+                <select name="status" id="status"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="Active" {% if lead.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Closed" {% if lead.status == 'Closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="first_contact_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-calendar text-sky-blue mr-2"></i>First Contact Date
+                </label>
+                <input type="date" name="first_contact_date" id="first_contact_date"
+                       value="{% if lead and lead.first_contact_date %}{{ lead.first_contact_date.strftime('%Y-%m-%d') }}{% endif %}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+            </div>
+
+            <div>
+                <label for="next_follow_up_date" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-calendar-check text-green-500 mr-2"></i>Next Follow-up Date
+                </label>
+                <input type="date" name="next_follow_up_date" id="next_follow_up_date"
+                       value="{% if lead and lead.next_follow_up_date %}{{ lead.next_follow_up_date.strftime('%Y-%m-%d') }}{% endif %}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div>
+            <label for="notes" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-sticky-note text-yellow-500 mr-2"></i>Notes
+            </label>
+            <textarea name="notes" id="notes" rows="4"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                      placeholder="Add any additional notes about this lead...">{% if lead %}{{ lead.notes }}{% endif %}</textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <button type="submit"
+                    class="flex-1 bg-deep-space hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg card-hover">
+                <i class="fas fa-save mr-2"></i>{% if lead %}Update Lead{% else %}Create Lead{% endif %}
+            </button>
+            <a href="{% if lead %}{{ url_for('leads.view_lead', id=lead.id) }}{% else %}{{ url_for('leads.list_leads') }}{% endif %}"
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

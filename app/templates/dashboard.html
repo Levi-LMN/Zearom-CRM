@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Zearom CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-deep-space">Dashboard</h1>
+            <p class="text-gray-600 mt-1">Welcome back, {{ current_user.name }}! Here's your overview.</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="{{ url_for('leads.create_lead') }}" class="inline-flex items-center px-6 py-3 bg-deep-space hover:bg-opacity-90 text-white rounded-lg transition shadow-lg card-hover">
+                <i class="fas fa-plus mr-2"></i>Create New Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Products Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-sky-blue">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Active Products</p>
+                    <p class="text-3xl font-bold text-deep-space mt-2">{{ stats.products }}</p>
+                </div>
+                <div class="bg-sky-blue bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-box text-deep-space text-2xl"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('products.list_products') }}" class="text-sky-blue text-sm mt-4 inline-block hover:underline">
+                View all <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        <!-- Organizations Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-steel-blue">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Organizations</p>
+                    <p class="text-3xl font-bold text-deep-space mt-2">{{ stats.organizations }}</p>
+                </div>
+                <div class="bg-steel-blue bg-opacity-20 p-4 rounded-full">
+                    <i class="fas fa-building text-deep-space text-2xl"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('organizations.list_organizations') }}" class="text-steel-blue text-sm mt-4 inline-block hover:underline">
+                View all <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        <!-- Active Leads Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Active Leads</p>
+                    <p class="text-3xl font-bold text-deep-space mt-2">{{ stats.leads }}</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-full">
+                    <i class="fas fa-handshake text-green-600 text-2xl"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('leads.list_leads') }}" class="text-green-600 text-sm mt-4 inline-block hover:underline">
+                View all <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        <!-- Interactions Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-purple-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium">Total Interactions</p>
+                    <p class="text-3xl font-bold text-deep-space mt-2">{{ stats.interactions }}</p>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-full">
+                    <i class="fas fa-comments text-purple-600 text-2xl"></i>
+                </div>
+            </div>
+            <p class="text-gray-500 text-sm mt-4">All time</p>
+        </div>
+    </div>
+
+    <!-- Charts and Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Lead Stage Distribution -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold text-deep-space mb-4">Lead Stage Distribution</h3>
+            <div class="space-y-3">
+                {% for stage, count in analytics.stage_distribution.items() %}
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-medium text-gray-700">{{ stage }}</span>
+                        <span class="text-sm font-bold text-deep-space">{{ count }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-sky-blue h-2 rounded-full" style="width: {{ (count / analytics.total_leads * 100) if analytics.total_leads > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Temperature & Conversion -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <h3 class="text-xl font-bold text-deep-space mb-4">Performance Metrics</h3>
+            
+            <!-- Conversion Rate -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">Conversion Rate</p>
+                <p class="text-4xl font-bold text-deep-space">{{ analytics.conversion_rate }}%</p>
+                <p class="text-sm text-gray-500 mt-1">{{ analytics.closed_won }} won out of {{ analytics.total_leads }} total leads</p>
+            </div>
+
+            <!-- Temperature Distribution -->
+            <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Lead Temperature</p>
+                {% for temp, count in analytics.temperature_distribution.items() %}
+                <div class="flex items-center justify-between p-3 rounded-lg {% if temp == 'Hot' %}bg-red-50{% elif temp == 'Warm' %}bg-orange-50{% else %}bg-blue-50{% endif %}">
+                    <span class="font-medium {% if temp == 'Hot' %}text-red-700{% elif temp == 'Warm' %}text-orange-700{% else %}text-blue-700{% endif %}">
+                        <i class="fas fa-thermometer-{% if temp == 'Hot' %}full{% elif temp == 'Warm' %}half{% else %}empty{% endif %} mr-2"></i>{{ temp }}
+                    </span>
+                    <span class="font-bold text-deep-space">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Leads -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-deep-space">Recent Leads</h3>
+            <a href="{{ url_for('leads.list_leads') }}" class="text-sky-blue hover:underline text-sm">
+                View all leads <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Organization</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Product</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Stage</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Temperature</th>
+                        <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Created</th>
+                        <th class="text-right py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in recent_leads %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td class="py-3 px-4">
+                            <p class="font-medium text-deep-space">{{ lead.organization.name }}</p>
+                        </td>
+                        <td class="py-3 px-4 text-gray-600">{{ lead.product.name }}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-sky-blue bg-opacity-20 text-deep-space">
+                                {{ lead.stage }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium 
+                                {% if lead.temperature == 'Hot' %}bg-red-100 text-red-700
+                                {% elif lead.temperature == 'Warm' %}bg-orange-100 text-orange-700
+                                {% else %}bg-blue-100 text-blue-700{% endif %}">
+                                {{ lead.temperature }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-gray-600">{{ lead.created_at.strftime('%b %d, %Y') }}</td>
+                        <td class="py-3 px-4 text-right">
+                            <a href="{{ url_for('leads.view_lead', id=lead.id) }}" class="text-sky-blue hover:text-deep-space transition">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

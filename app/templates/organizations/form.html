@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{% if organization %}Edit Organization{% else %}Create Organization{% endif %} - Zearom CRM{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-deep-space">{% if organization %}Edit Organization{% else %}Create New Organization{% endif %}</h1>
+        <p class="text-gray-600 mt-1">{% if organization %}Update organization information{% else %}Add a new client organization{% endif %}</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <!-- Organization Name -->
+        <div>
+            <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-building text-sky-blue mr-2"></i>Organization Name *
+            </label>
+            <input type="text" name="name" id="name" required
+                   value="{% if organization %}{{ organization.name }}{% endif %}"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                   placeholder="Enter organization name">
+        </div>
+
+        <!-- Industry -->
+        <div>
+            <label for="industry" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-industry text-steel-blue mr-2"></i>Industry
+            </label>
+            <input type="text" name="industry" id="industry"
+                   value="{% if organization %}{{ organization.industry }}{% endif %}"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                   placeholder="e.g., Technology, Healthcare, Finance">
+        </div>
+
+        <!-- Location -->
+        <div>
+            <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>Location
+            </label>
+            <input type="text" name="location" id="location"
+                   value="{% if organization %}{{ organization.location }}{% endif %}"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                   placeholder="City, State or Country">
+        </div>
+
+        <!-- Size -->
+        <div>
+            <label for="size" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-users text-purple-500 mr-2"></i>Company Size
+            </label>
+            <select name="size" id="size"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                <option value="">Select size...</option>
+                <option value="1-10" {% if organization and organization.size == '1-10' %}selected{% endif %}>1-10 employees</option>
+                <option value="11-50" {% if organization and organization.size == '11-50' %}selected{% endif %}>11-50 employees</option>
+                <option value="51-200" {% if organization and organization.size == '51-200' %}selected{% endif %}>51-200 employees</option>
+                <option value="201-500" {% if organization and organization.size == '201-500' %}selected{% endif %}>201-500 employees</option>
+                <option value="501-1000" {% if organization and organization.size == '501-1000' %}selected{% endif %}>501-1000 employees</option>
+                <option value="1000+" {% if organization and organization.size == '1000+' %}selected{% endif %}>1000+ employees</option>
+            </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <button type="submit"
+                    class="flex-1 bg-deep-space hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg card-hover">
+                <i class="fas fa-save mr-2"></i>{% if organization %}Update Organization{% else %}Create Organization{% endif %}
+            </button>
+            <a href="{{ url_for('organizations.list_organizations') }}"
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

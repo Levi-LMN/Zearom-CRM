@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Leads - Zearom CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-deep-space">Leads Management</h1>
+            <p class="text-gray-600 mt-1">Track and manage all your sales opportunities</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="{{ url_for('leads.create_lead') }}" class="inline-flex items-center px-6 py-3 bg-deep-space hover:bg-opacity-90 text-white rounded-lg transition shadow-lg card-hover">
+                <i class="fas fa-plus mr-2"></i>New Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl shadow-md p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="searchInput" placeholder="Search leads..." class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+            <select id="stageFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+                <option value="">All Stages</option>
+                <option value="New">New</option>
+                <option value="Reached">Reached</option>
+                <option value="Interested">Interested</option>
+                <option value="Demo Scheduled">Demo Scheduled</option>
+                <option value="Pilot">Pilot</option>
+                <option value="Pricing">Pricing</option>
+                <option value="Closed Won">Closed Won</option>
+                <option value="Closed Lost">Closed Lost</option>
+            </select>
+            <select id="tempFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+                <option value="">All Temperatures</option>
+                <option value="Hot">Hot</option>
+                <option value="Warm">Warm</option>
+                <option value="Cold">Cold</option>
+            </select>
+            <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Closed">Closed</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Leads Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="leadsGrid">
+        {% for lead in leads %}
+        <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover lead-card" 
+             data-stage="{{ lead.stage }}" 
+             data-temp="{{ lead.temperature }}" 
+             data-status="{{ lead.status }}"
+             data-search="{{ lead.organization.name|lower }} {{ lead.product.name|lower }}">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-bold text-deep-space mb-1">{{ lead.organization.name }}</h3>
+                        <p class="text-sm text-gray-600">{{ lead.product.name }}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium 
+                        {% if lead.temperature == 'Hot' %}bg-red-100 text-red-700
+                        {% elif lead.temperature == 'Warm' %}bg-orange-100 text-orange-700
+                        {% else %}bg-blue-100 text-blue-700{% endif %}">
+                        <i class="fas fa-thermometer-{% if lead.temperature == 'Hot' %}full{% elif lead.temperature == 'Warm' %}half{% else %}empty{% endif %} mr-1"></i>
+                        {{ lead.temperature }}
+                    </span>
+                </div>
+
+                <!-- Details -->
+                <div class="space-y-3 mb-4">
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-layer-group text-sky-blue w-5"></i>
+                        <span class="text-gray-700 ml-2">{{ lead.stage }}</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-user text-steel-blue w-5"></i>
+                        <span class="text-gray-700 ml-2">{{ lead.owner.name }}</span>
+                    </div>
+                    {% if lead.next_follow_up_date %}
+                    <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar-alt text-green-500 w-5"></i>
+                        <span class="text-gray-700 ml-2">Follow-up: {{ lead.next_follow_up_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Status Badge -->
+                <div class="mb-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium {% if lead.status == 'Active' %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-700{% endif %}">
+                        {{ lead.status }}
+                    </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex space-x-2 pt-4 border-t border-gray-100">
+                    <a href="{{ url_for('leads.view_lead', id=lead.id) }}" class="flex-1 text-center px-4 py-2 bg-sky-blue bg-opacity-20 text-deep-space rounded-lg hover:bg-opacity-30 transition text-sm font-medium">
+                        <i class="fas fa-eye mr-1"></i>View
+                    </a>
+                    <a href="{{ url_for('leads.edit_lead', id=lead.id) }}" class="flex-1 text-center px-4 py-2 bg-steel-blue bg-opacity-20 text-deep-space rounded-lg hover:bg-opacity-30 transition text-sm font-medium">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-12">
+        <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+        <p class="text-xl text-gray-600">No leads found</p>
+        <p class="text-gray-500 mt-2">Try adjusting your filters</p>
+    </div>
+</div>
+
+<script>
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const stageFilter = document.getElementById('stageFilter');
+    const tempFilter = document.getElementById('tempFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const leadsGrid = document.getElementById('leadsGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    function filterLeads() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedStage = stageFilter.value;
+        const selectedTemp = tempFilter.value;
+        const selectedStatus = statusFilter.value;
+        
+        const leadCards = document.querySelectorAll('.lead-card');
+        let visibleCount = 0;
+
+        leadCards.forEach(card => {
+            const matchesSearch = card.dataset.search.includes(searchTerm);
+            const matchesStage = !selectedStage || card.dataset.stage === selectedStage;
+            const matchesTemp = !selectedTemp || card.dataset.temp === selectedTemp;
+            const matchesStatus = !selectedStatus || card.dataset.status === selectedStatus;
+
+            if (matchesSearch && matchesStage && matchesTemp && matchesStatus) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Show/hide empty state
+        if (visibleCount === 0) {
+            leadsGrid.style.display = 'none';
+            emptyState.classList.remove('hidden');
+        } else {
+            leadsGrid.style.display = 'grid';
+            emptyState.classList.add('hidden');
+        }
+    }
+
+    searchInput.addEventListener('input', filterLeads);
+    stageFilter.addEventListener('change', filterLeads);
+    tempFilter.addEventListener('change', filterLeads);
+    statusFilter.addEventListener('change', filterLeads);
+</script>
+{% endblock %}

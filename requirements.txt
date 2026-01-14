@@ -1,0 +1,48 @@
+# Project Structure:
+# zearom_crm/
+# ├── app/
+# │   ├── __init__.py
+# │   ├── models.py
+# │   ├── auth.py
+# │   ├── routes/
+# │   │   ├── __init__.py
+# │   │   ├── main.py
+# │   │   ├── products.py
+# │   │   ├── organizations.py
+# │   │   ├── leads.py
+# │   │   └── interactions.py
+# │   ├── templates/
+# │   │   ├── base.html
+# │   │   ├── dashboard.html
+# │   │   ├── products/
+# │   │   ├── organizations/
+# │   │   ├── leads/
+# │   │   └── interactions/
+# │   └── static/
+# ├── config.py
+# ├── requirements.txt
+# ├── .env.example
+# └── run.py
+
+# ============================================================================
+# requirements.txt
+# ============================================================================
+
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+python-dotenv==1.0.0
+authlib==1.3.0
+requests==2.31.0
+
+
+
+
+
+
+
+
+
+
+
+

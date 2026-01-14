@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lead.organization.name }} - Lead Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <div class="flex items-center space-x-3 mb-2">
+                <a href="{{ url_for('leads.list_leads') }}" class="text-sky-blue hover:text-deep-space transition">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-3xl font-bold text-deep-space">{{ lead.organization.name }}</h1>
+                <span class="px-3 py-1 rounded-full text-xs font-medium
+                    {% if lead.temperature == 'Hot' %}bg-red-100 text-red-700
+                    {% elif lead.temperature == 'Warm' %}bg-orange-100 text-orange-700
+                    {% else %}bg-blue-100 text-blue-700{% endif %}">
+                    <i class="fas fa-thermometer-{% if lead.temperature == 'Hot' %}full{% elif lead.temperature == 'Warm' %}half{% else %}empty{% endif %} mr-1"></i>
+                    {{ lead.temperature }}
+                </span>
+            </div>
+            <p class="text-gray-600">Lead details and interaction history</p>
+        </div>
+        <div class="mt-4 lg:mt-0">
+            <a href="{{ url_for('leads.edit_lead', id=lead.id) }}"
+               class="inline-flex items-center px-6 py-3 bg-deep-space hover:bg-opacity-90 text-white rounded-lg transition shadow-lg card-hover">
+                <i class="fas fa-edit mr-2"></i>Edit Lead
+            </a>
+        </div>
+    </div>
+
+    <!-- Lead Information Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Details Card -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold text-deep-space mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-sky-blue mr-2"></i>Lead Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Product</p>
+                        <p class="font-semibold text-deep-space">{{ lead.product.name }}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Stage</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-sky-blue bg-opacity-20 text-deep-space">
+                            {{ lead.stage }}
+                        </span>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Owner</p>
+                        <div class="flex items-center space-x-2">
+                            <img src="{{ lead.owner.profile_picture or 'https://ui-avatars.com/api/?name=' + lead.owner.name }}"
+                                 alt="{{ lead.owner.name }}"
+                                 class="w-6 h-6 rounded-full">
+                            <p class="font-semibold text-deep-space">{{ lead.owner.name }}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Status</p>
+                        <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                            {% if lead.status == 'Active' %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ lead.status }}
+                        </span>
+                    </div>
+                    {% if lead.source %}
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Source</p>
+                        <p class="font-semibold text-deep-space">{{ lead.source }}</p>
+                    </div>
+                    {% endif %}
+                    {% if lead.first_contact_date %}
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">First Contact</p>
+                        <p class="font-semibold text-deep-space">{{ lead.first_contact_date.strftime('%B %d, %Y') }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if lead.notes %}
+                <div class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <p class="text-sm text-gray-600 mb-2 font-semibold">
+                        <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Notes
+                    </p>
+                    <p class="text-gray-700">{{ lead.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Interactions -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-deep-space flex items-center">
+                        <i class="fas fa-comments text-purple-500 mr-2"></i>Interactions
+                    </h2>
+                    <button onclick="toggleInteractionForm()"
+                            class="px-4 py-2 bg-deep-space hover:bg-opacity-90 text-white rounded-lg transition text-sm">
+                        <i class="fas fa-plus mr-2"></i>Add Interaction
+                    </button>
+                </div>
+
+                <!-- Add Interaction Form (Hidden by default) -->
+                <div id="interactionForm" class="hidden mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <form method="POST" action="{{ url_for('interactions.add_interaction', lead_id=lead.id) }}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="interaction_type" class="block text-sm font-semibold text-gray-700 mb-2">Type *</label>
+                                <select name="interaction_type" id="interaction_type" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+                                    <option value="Call">Call</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Demo">Demo</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Follow-up">Follow-up</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="date" class="block text-sm font-semibold text-gray-700 mb-2">Date *</label>
+                                <input type="date" name="date" id="date" required value="{{ today }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="summary" class="block text-sm font-semibold text-gray-700 mb-2">Summary</label>
+                                <textarea name="summary" id="summary" rows="2"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent"
+                                          placeholder="Brief summary of the interaction..."></textarea>
+                            </div>
+                            <div>
+                                <label for="outcome" class="block text-sm font-semibold text-gray-700 mb-2">Outcome</label>
+                                <textarea name="outcome" id="outcome" rows="2"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent"
+                                          placeholder="What was the result?"></textarea>
+                            </div>
+                            <div>
+                                <label for="next_action" class="block text-sm font-semibold text-gray-700 mb-2">Next Action</label>
+                                <textarea name="next_action" id="next_action" rows="2"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent"
+                                          placeholder="What's the next step?"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 mt-4">
+                            <button type="submit" class="px-4 py-2 bg-deep-space hover:bg-opacity-90 text-white rounded-lg transition">
+                                <i class="fas fa-save mr-2"></i>Save Interaction
+                            </button>
+                            <button type="button" onclick="toggleInteractionForm()"
+                                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Interactions Timeline -->
+                <div class="space-y-4">
+                    {% if lead.interactions %}
+                        {% for interaction in lead.interactions|reverse %}
+                        <div class="border-l-4 border-sky-blue pl-4 py-2">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                            {{ interaction.interaction_type }}
+                                        </span>
+                                        <span class="text-sm text-gray-600">{{ interaction.date.strftime('%B %d, %Y') }}</span>
+                                    </div>
+                                    {% if interaction.summary %}
+                                    <p class="text-gray-800 mb-2"><strong>Summary:</strong> {{ interaction.summary }}</p>
+                                    {% endif %}
+                                    {% if interaction.outcome %}
+                                    <p class="text-gray-700 mb-2"><strong>Outcome:</strong> {{ interaction.outcome }}</p>
+                                    {% endif %}
+                                    {% if interaction.next_action %}
+                                    <p class="text-gray-700"><strong>Next Action:</strong> {{ interaction.next_action }}</p>
+                                    {% endif %}
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i class="fas fa-user mr-1"></i>{{ interaction.created_by.name }}
+                                    </p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('interactions.edit_interaction', id=interaction.id) }}"
+                                       class="text-sky-blue hover:text-deep-space transition">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('interactions.delete_interaction', id=interaction.id) }}"
+                                          onsubmit="return confirm('Are you sure you want to delete this interaction?');">
+                                        <button type="submit" class="text-red-500 hover:text-red-700 transition">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-comments text-4xl mb-2"></i>
+                        <p>No interactions recorded yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Follow-up Card -->
+            {% if lead.next_follow_up_date %}
+            <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl shadow-md p-6 border border-green-200">
+                <h3 class="text-lg font-bold text-deep-space mb-3 flex items-center">
+                    <i class="fas fa-calendar-check text-green-600 mr-2"></i>Next Follow-up
+                </h3>
+                <p class="text-2xl font-bold text-deep-space">{{ lead.next_follow_up_date.strftime('%B %d, %Y') }}</p>
+                <p class="text-sm text-gray-600 mt-2">
+                    {% set days_until = (lead.next_follow_up_date - today).days %}
+                    {% if days_until < 0 %}
+                        Overdue by {{ -days_until }} day(s)
+                    {% elif days_until == 0 %}
+                        Due today
+                    {% else %}
+                        In {{ days_until }} day(s)
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Organization Details -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-lg font-bold text-deep-space mb-4 flex items-center">
+                    <i class="fas fa-building text-steel-blue mr-2"></i>Organization
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-600">Name</p>
+                        <p class="font-semibold text-deep-space">{{ lead.organization.name }}</p>
+                    </div>
+                    {% if lead.organization.industry %}
+                    <div>
+                        <p class="text-sm text-gray-600">Industry</p>
+                        <p class="font-semibold text-deep-space">{{ lead.organization.industry }}</p>
+                    </div>
+                    {% endif %}
+                    {% if lead.organization.location %}
+                    <div>
+                        <p class="text-sm text-gray-600">Location</p>
+                        <p class="font-semibold text-deep-space">{{ lead.organization.location }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('organizations.view_organization', id=lead.organization.id) }}"
+                   class="mt-4 inline-block text-sky-blue hover:underline text-sm">
+                    View full details <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <!-- Timeline -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-lg font-bold text-deep-space mb-4 flex items-center">
+                    <i class="fas fa-clock text-yellow-500 mr-2"></i>Timeline
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center text-gray-700">
+                        <i class="fas fa-plus-circle text-green-500 w-5 mr-2"></i>
+                        <span>Created {{ lead.created_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <i class="fas fa-edit text-blue-500 w-5 mr-2"></i>
+                        <span>Updated {{ lead.updated_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <i class="fas fa-comments text-purple-500 w-5 mr-2"></i>
+                        <span>{{ lead.interactions|length }} interaction(s)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleInteractionForm() {
+        const form = document.getElementById('interactionForm');
+        form.classList.toggle('hidden');
+    }
+
+    // Set today's date as default
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('date');
+        if (!dateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+        }
+    });
+</script>
+{% endblock %}

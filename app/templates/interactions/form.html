@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Interaction - Zearom CRM{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-deep-space">Edit Interaction</h1>
+        <p class="text-gray-600 mt-1">Update interaction details</p>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <!-- Interaction Type & Date -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="interaction_type" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-comments text-purple-500 mr-2"></i>Interaction Type *
+                </label>
+                <select name="interaction_type" id="interaction_type" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+                    <option value="Call" {% if interaction.interaction_type == 'Call' %}selected{% endif %}>Call</option>
+                    <option value="Email" {% if interaction.interaction_type == 'Email' %}selected{% endif %}>Email</option>
+                    <option value="Demo" {% if interaction.interaction_type == 'Demo' %}selected{% endif %}>Demo</option>
+                    <option value="Meeting" {% if interaction.interaction_type == 'Meeting' %}selected{% endif %}>Meeting</option>
+                    <option value="Follow-up" {% if interaction.interaction_type == 'Follow-up' %}selected{% endif %}>Follow-up</option>
+                    <option value="Other" {% if interaction.interaction_type == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="date" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-calendar text-sky-blue mr-2"></i>Date *
+                </label>
+                <input type="date" name="date" id="date" required 
+                       value="{{ interaction.date.strftime('%Y-%m-%d') }}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition">
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div>
+            <label for="summary" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-align-left text-green-500 mr-2"></i>Summary
+            </label>
+            <textarea name="summary" id="summary" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                      placeholder="Brief summary of the interaction...">{{ interaction.summary }}</textarea>
+        </div>
+
+        <!-- Outcome -->
+        <div>
+            <label for="outcome" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-check-circle text-blue-500 mr-2"></i>Outcome
+            </label>
+            <textarea name="outcome" id="outcome" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                      placeholder="What was the result of this interaction?">{{ interaction.outcome }}</textarea>
+        </div>
+
+        <!-- Next Action -->
+        <div>
+            <label for="next_action" class="block text-sm font-semibold text-gray-700 mb-2">
+                <i class="fas fa-tasks text-orange-500 mr-2"></i>Next Action
+            </label>
+            <textarea name="next_action" id="next_action" rows="3" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-blue focus:border-transparent transition"
+                      placeholder="What's the next step?">{{ interaction.next_action }}</textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <button type="submit" 
+                    class="flex-1 bg-deep-space hover:bg-opacity-90 text-white px-6 py-3 rounded-lg font-semibold transition shadow-lg card-hover">
+                <i class="fas fa-save mr-2"></i>Update Interaction
+            </button>
+            <a href="{{ url_for('leads.view_lead', id=interaction.lead_id) }}" 
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
